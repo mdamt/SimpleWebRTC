@@ -37,6 +37,14 @@ function SimpleWebRTC(opts) {
             }
         };
     var item, connection;
+    var initialized = false;
+
+    function initSession() {
+      self.emit('connectionReady', connection.getSessionid());
+      self.sessionReady = true;
+      self.testReadiness();
+      initialized = true;
+    }
 
     // We also allow a 'logger' option. It can be any object that implements
     // log, warn, and error methods.
@@ -74,9 +82,7 @@ function SimpleWebRTC(opts) {
     }
 
     connection.on('connect', function () {
-        self.emit('connectionReady', connection.getSessionid());
-        self.sessionReady = true;
-        self.testReadiness();
+      initSession();
     });
 
     connection.on('message', function (message) {
@@ -249,6 +255,13 @@ function SimpleWebRTC(opts) {
     });
 
     if (this.config.autoRequestMedia) this.startLocalVideo();
+
+
+    if (connection.connection.connected && !initialized) {
+      initSession();
+    }
+
+
 }
 
 
